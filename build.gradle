@@ -71,7 +71,6 @@ uploadArchives {
                 url 'https://github.com/foobar27/nativeinitializer'
                 description 'Specify how native libraries should be loaded'
                 packaging 'jar'
-                description 'A application used as an example on how to set up'
                 url 'http://www.example.com/example-application'
 
                 scm {

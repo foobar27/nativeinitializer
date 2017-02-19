@@ -31,7 +31,7 @@ publishing {
 	    from components.java
             pom.withXml {
                 asNode().with {
-                    appendNode('name', 'nativeinitalizer')
+                    appendNode('name', 'native-initalizer')
                     appendNode('url',
                                'https://github.com/foobar27/nativeinitializer')
                     appendNode('description',

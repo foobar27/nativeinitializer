@@ -43,6 +43,23 @@ publishing {
                             appendNode('distribution', 'repo')
                         }
                     }
+                    appendNode('developers').with {
+                        appendNode('developer').with {
+                            appendNode('name', 'Sebastien Wagener')
+                            appendNode('email', 'sebastien.wagener@gmail.com')
+                            appendNode('organization', 'foobar27')
+                            appendNode('organizationUrl', 'http://github.com/foobar27')
+                        }
+                    }
+                    appendNode('issueManagement').with {
+                        appendNode('system', 'github')
+                        appendNode('url', 'https://github.com/foobar27/nativeinitializer/issues')
+                    }
+                    appendNode('scm').with {
+                        appendNode('connection', 'scm:git:git://github.com/foobar27/nativeinitializer.git')
+                        appendNode('developerConnection', 'scm:git:ssh://github.com:foobar27/nativeinitializer.git')
+                        appendNode('url', 'http://github.com/foobar27/nativeinitializer/tree/master')
+                    }
                 }
             }
             tasks.withType(Jar) {

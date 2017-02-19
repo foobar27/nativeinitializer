@@ -180,7 +180,7 @@ public final class NativeLoaderFactory {
         if (!Files.exists(tmpDir)) {
             Files.createDirectory(tmpDir);
         }
-        Path file = Files.createFile(tmpDir.resolve(libraryName + ".tmp"));
+        Path file = Files.createFile(tmpDir.resolve(namingScheme.getLibraryName() + ".tmp"));
         if (deleteOnExit) {
             file.toFile().deleteOnExit();
         }

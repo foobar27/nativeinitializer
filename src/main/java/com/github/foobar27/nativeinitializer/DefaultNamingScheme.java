@@ -49,7 +49,7 @@ public class DefaultNamingScheme implements NamingScheme {
         String osArch = System.getProperty("os.arch");
         String osName = System.getProperty("os.name").toLowerCase();
         Platform platform = new Platform(osArch, osName);
-        String result = platform.osName + "-" + platform.architecture;
+        String result = libraryName + "-" + platform.osName + "-" + platform.architecture;
         if (relativePath != null) {
             return relativePath + result;
         } else {

@@ -44,22 +44,11 @@ public class DefaultNamingScheme implements NamingScheme {
         return libraryName;
     }
 
-    public void addSupportedPlatform(String architecture, String osName) {
-        supportedPlatforms.add(new Platform(architecture, osName));
-    }
-
-    public void removeSupportedPlatform(String architecture, String osName) {
-        supportedPlatforms.remove(new Platform(architecture, osName));
-    }
-
     @Override
     public String determineName() {
         String osArch = System.getProperty("os.arch");
         String osName = System.getProperty("os.name").toLowerCase();
         Platform platform = new Platform(osArch, osName);
-        if (!supportedPlatforms.contains(platform)) {
-            throw new UnsupportedOperationException("Platform " + platform+ " not supported");
-        }
         String result = platform.osName + "-" + platform.architecture;
         if (relativePath != null) {
             return relativePath + result;
@@ -102,6 +91,11 @@ public class DefaultNamingScheme implements NamingScheme {
         public int hashCode() {
             return Objects.hash(architecture, osName);
         }
+    }
+
+    public static void main(String[] args) {
+        DefaultNamingScheme scheme = new DefaultNamingScheme("thelib");
+        System.out.println(scheme.determineName());
     }
 
 }

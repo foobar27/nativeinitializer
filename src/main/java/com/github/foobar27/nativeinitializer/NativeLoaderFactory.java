@@ -127,7 +127,7 @@ public final class NativeLoaderFactory {
                                 libraryName,
                                 tempDirectory,
                                 deleteOnExit));
-                System.load(saveLibrary(libraryName, tempDirectory, deleteOnExit).toString());
+                System.load(saveLibrary(tempDirectory, deleteOnExit).toString());
             }
         };
     }
@@ -167,17 +167,17 @@ public final class NativeLoaderFactory {
         }
     }
 
-    private Path saveLibrary(String library, Path tmpDir, boolean deleteOnExit) throws IOException {
+    private Path saveLibrary(Path tmpDir, boolean deleteOnExit) throws IOException {
+        String libraryName = namingScheme.determineName();
         logger.info(
                 String.format("Extracting %s to %s%s",
-                        library,
+                        libraryName,
                         tmpDir,
                         deleteOnExit ? " (will be deleted on exit)" : ""));
-        String libraryName = namingScheme.determineName();
         if (!Files.exists(tmpDir)) {
             Files.createDirectory(tmpDir);
         }
-        Path file = Files.createFile(tmpDir.resolve(library + ".tmp"));
+        Path file = Files.createFile(tmpDir.resolve(libraryName + ".tmp"));
         if (deleteOnExit) {
             file.toFile().deleteOnExit();
         }

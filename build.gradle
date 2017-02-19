@@ -35,7 +35,7 @@ publishing {
                     appendNode('url',
                                'https://github.com/foobar27/nativeinitializer')
                     appendNode('description',
-                               'LFacilitate loading of native libraries')
+                               'Specify how native libraries should be loaded')
                     appendNode('licenses').with {
                         appendNode('license').with {
                             appendNode('name', 'Eclipse Public License (EPL), Version 1.0')

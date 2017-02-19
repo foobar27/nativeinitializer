@@ -13,6 +13,7 @@ package com.github.foobar27.nativeinitializer;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class NativeLoaderFactory {
@@ -147,10 +148,12 @@ public final class NativeLoaderFactory {
             try {
                 firstLoader.load();
             } catch (Exception e) {
-                logger.info(
+                logger.log(
+                        Level.INFO,
                         String.format("%s failed, trying %s",
                                 firstLoader,
-                                secondLoader));
+                                secondLoader),
+                        e);
                 secondLoader.load();
             }
         }

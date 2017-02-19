@@ -12,11 +12,39 @@ group 'com.github.foobar27'
 version "0.1.0"
 
 apply plugin: 'java'
-apply plugin: 'maven-publish'
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        //classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.3"
+    }
+}
+
+//apply plugin: 'io.codearte.nexus-staging'
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
 
 repositories {
-    // Use jcenter for resolving your dependencies.
-    // You can declare any Maven/Ivy/file repository here.
     jcenter()
 }
 
@@ -25,62 +53,52 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-	    from components.java
-            pom.withXml {
-                asNode().with {
-                    appendNode('name', 'native-initalizer')
-                    appendNode('url',
-                               'https://github.com/foobar27/nativeinitializer')
-                    appendNode('description',
-                               'Specify how native libraries should be loaded')
-                    appendNode('licenses').with {
-                        appendNode('license').with {
-                            appendNode('name', 'Eclipse Public License (EPL), Version 1.0')
-                            appendNode('url', ' http://www.eclipse.org/legal/epl-v10.html')
-                            appendNode('distribution', 'repo')
-                        }
-                    }
-                    appendNode('developers').with {
-                        appendNode('developer').with {
-                            appendNode('name', 'Sebastien Wagener')
-                            appendNode('email', 'sebastien.wagener@gmail.com')
-                            appendNode('organization', 'foobar27')
-                            appendNode('organizationUrl', 'http://github.com/foobar27')
-                        }
-                    }
-                    appendNode('issueManagement').with {
-                        appendNode('system', 'github')
-                        appendNode('url', 'https://github.com/foobar27/nativeinitializer/issues')
-                    }
-                    appendNode('scm').with {
-                        appendNode('connection', 'scm:git:git://github.com/foobar27/nativeinitializer.git')
-                        appendNode('developerConnection', 'scm:git:ssh://github.com:foobar27/nativeinitializer.git')
-                        appendNode('url', 'http://github.com/foobar27/nativeinitializer/tree/master')
-                    }
-                }
-            }
-            tasks.withType(Jar) {
-                from(project.projectDir) {
-                    include 'LICENSE'
-                    into 'META-INF'
-                }
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
             }
 
-            artifact sourceJar
-            artifact javadocJar
-	}
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name 'native-initializer'
+                url 'https://github.com/foobar27/nativeinitializer'
+                description 'Specify how native libraries should be loaded'
+                packaging 'jar'
+                description 'A application used as an example on how to set up'
+                url 'http://www.example.com/example-application'
+
+                scm {
+                    connection 'scm:git:git://github.com/foobar27/nativeinitializer.git'
+                    developerConnection 'scm:git:ssh://github.com:foobar27/nativeinitializer.git'
+                    url 'http://github.com/foobar27/nativeinitializer/tree/master'
+                }
+
+                licenses {
+                    license {
+                        name 'Eclipse Public License (EPL), Version 1.0'
+                        url 'http://www.eclipse.org/legal/epl-v10.html'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'foobar27'
+                        name 'Sebastien Wagener'
+                        email 'sebastien.wagener@gmail.com'
+                    }
+                }
+                issueManagement {
+                    system 'github'
+                    url 'https://github.com/foobar27/nativeinitializer/issues'
+                }
+            }
+        }
     }
-}
-
-task sourceJar(type: Jar, dependsOn: classes) {
-    classifier 'sources'
-    from sourceSets.main.allSource
-}
- 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
 }

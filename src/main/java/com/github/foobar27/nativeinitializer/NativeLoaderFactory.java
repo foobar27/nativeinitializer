@@ -13,8 +13,12 @@ package com.github.foobar27.nativeinitializer;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public final class NativeLoaderFactory {
 
@@ -180,15 +184,33 @@ public final class NativeLoaderFactory {
         if (!Files.exists(tmpDir)) {
             Files.createDirectory(tmpDir);
         }
-        Path file = Files.createFile(tmpDir.resolve(namingScheme.getLibraryName() + ".tmp"));
-        if (deleteOnExit) {
-            file.toFile().deleteOnExit();
+        Path file = tmpDir.resolve(namingScheme.getLibraryName());
+        if (Files.exists(file)) {
+            if (deleteOnExit) {
+                // There might be a race condition that the file will be deleted in the short period
+                // between this check and the subsequent loading
+                // (especially when the a small program is executed again and again).
+                // Let's extract it again. Since we extract it to a random file and atomically move it afterwards
+                // there should not be a race condition.
+            } else {
+                // In normal operations the file will not be deleted in the short period
+                // between this check and the subsequent loading, no need to extract it again.
+                // The speed improvement outweighs this risk.
+                return file;
+            }
         }
+
+        // Avoid race conditions by making an atomic move from a random file.
+        Path tmpFile = Files.createFile(tmpDir.resolve(UUID.randomUUID().toString()));
         try (InputStream in = NativeLoaderFactory
                 .class
                 .getClassLoader()
                 .getResourceAsStream(libraryName)) {
-            toFile(in, file.toFile());
+            toFile(in, tmpFile.toFile());
+        }
+        Files.move(tmpFile, file, ATOMIC_MOVE, REPLACE_EXISTING);
+        if (deleteOnExit) {
+            file.toFile().deleteOnExit();
         }
         return file;
     }

@@ -50,12 +50,15 @@ public class DefaultNamingScheme implements NamingScheme {
     }
 
     @Override
-    public String determineName() {
+    public String determineName(boolean includePath, boolean includeVersion) {
         String osArch = System.getProperty("os.arch");
         String osName = System.getProperty("os.name").toLowerCase();
         Platform platform = new Platform(osArch, osName);
-        String result = libraryName + "-" + platform.osName + "-" + platform.architecture + "-" + version;
-        if (relativePath != null) {
+        String result = libraryName + "-" + platform.osName + "-" + platform.architecture;
+        if (includeVersion) {
+            result = result + "-" + version;
+        }
+        if (includePath && relativePath != null) {
             return relativePath + result;
         } else {
             return result;
@@ -100,7 +103,8 @@ public class DefaultNamingScheme implements NamingScheme {
 
     public static void main(String[] args) {
         DefaultNamingScheme scheme = new DefaultNamingScheme("thelib", "0.4.2");
-        System.out.println(scheme.determineName());
+        System.out.println(scheme.determineName(false, false));
+        System.out.println(scheme.determineName(false, true));
     }
 
 }

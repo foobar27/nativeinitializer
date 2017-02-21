@@ -19,6 +19,6 @@ public interface NamingScheme {
      *
      * @return A relative file name
      */
-    String determineName();
+    String determineName(boolean includePath, boolean includeVersion);
 
 }

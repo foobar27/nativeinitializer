@@ -175,7 +175,7 @@ public final class NativeLoaderFactory {
     }
 
     private Path saveLibrary(Path tmpDir, boolean deleteOnExit) throws IOException {
-        String resourceName = namingScheme.determineName();
+        String resourceName = namingScheme.determineName(true, false);
         logger.info(
                 String.format("Extracting resource '%s' to '%s'%s",
                         resourceName,
@@ -184,7 +184,7 @@ public final class NativeLoaderFactory {
         if (!Files.exists(tmpDir)) {
             Files.createDirectory(tmpDir);
         }
-        Path file = tmpDir.resolve(namingScheme.getLibraryName());
+        Path file = tmpDir.resolve(namingScheme.determineName(false, true));
         if (Files.exists(file)) {
             if (deleteOnExit) {
                 // There might be a race condition that the file will be deleted in the short period
@@ -218,9 +218,8 @@ public final class NativeLoaderFactory {
                 .getClassLoader()
                 .getResourceAsStream(resourceName)) {
             if (in == null) {
-                logger.info(
-                        String.format(
-                                "Resource '%s' does not exist",
+                throw new IOException(
+                        String.format("Resource '%s' does not exist",
                                 resourceName));
             }
             toFile(in, tmpFile.toFile());

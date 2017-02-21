@@ -175,10 +175,10 @@ public final class NativeLoaderFactory {
     }
 
     private Path saveLibrary(Path tmpDir, boolean deleteOnExit) throws IOException {
-        String libraryName = namingScheme.determineName();
+        String resourceName = namingScheme.determineName();
         logger.info(
-                String.format("Extracting %s to %s%s",
-                        libraryName,
+                String.format("Extracting resource '%s' to '%s'%s",
+                        resourceName,
                         tmpDir,
                         deleteOnExit ? " (will be deleted on exit)" : ""));
         if (!Files.exists(tmpDir)) {
@@ -192,22 +192,44 @@ public final class NativeLoaderFactory {
                 // (especially when the a small program is executed again and again).
                 // Let's extract it again. Since we extract it to a random file and atomically move it afterwards
                 // there should not be a race condition.
+                logger.info(
+                        String.format(
+                                "File '%s' already exists, overwriting to avoid race conditions",
+                                file));
             } else {
                 // In normal operations the file will not be deleted in the short period
                 // between this check and the subsequent loading, no need to extract it again.
                 // The speed improvement outweighs this risk.
+                logger.info(
+                        String.format("File '%s' already exists, no need to extract",
+                                file));
                 return file;
             }
         }
 
         // Avoid race conditions by making an atomic move from a random file.
-        Path tmpFile = Files.createFile(tmpDir.resolve(UUID.randomUUID().toString()));
+        Path tmpFile = tmpDir.resolve(UUID.randomUUID().toString());
+        logger.info(
+                String.format(
+                        "Extracting to temporary file '%s'",
+                        tmpFile));
         try (InputStream in = NativeLoaderFactory
                 .class
                 .getClassLoader()
-                .getResourceAsStream(libraryName)) {
+                .getResourceAsStream(resourceName)) {
+            if (in == null) {
+                logger.info(
+                        String.format(
+                                "Resource '%s' does not exist",
+                                resourceName));
+            }
             toFile(in, tmpFile.toFile());
         }
+        logger.info(
+                String.format(
+                        "Moving temporary file '%s' -> '%s'",
+                        tmpFile,
+                        file));
         Files.move(tmpFile, file, ATOMIC_MOVE, REPLACE_EXISTING);
         if (deleteOnExit) {
             file.toFile().deleteOnExit();

@@ -10,21 +10,19 @@
  */
 package com.github.foobar27.nativeinitializer;
 
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 public class DefaultNamingScheme implements NamingScheme {
 
     private final String libraryName;
+    private final String version;
     private final String relativePath;
-    private final Set<Platform> supportedPlatforms = new HashSet<>();
 
-    public DefaultNamingScheme(String libraryName) {
-        this(libraryName, "lib/");
+    public DefaultNamingScheme(String libraryName, String version) {
+        this(libraryName, version, "lib/");
     }
 
-    public DefaultNamingScheme(String libraryName, String relativePath) {
+    public DefaultNamingScheme(String libraryName, String version, String relativePath) {
         if (libraryName == null) {
             throw new NullPointerException("libraryName is null");
         }
@@ -37,6 +35,13 @@ public class DefaultNamingScheme implements NamingScheme {
                 relativePath = relativePath + "/";
             }
         }
+        if (version == null) {
+            throw new NullPointerException("version is null");
+        }
+        if (version.isEmpty()) {
+            throw new IllegalArgumentException("version is empty");
+        }
+        this.version = version;
         this.relativePath = relativePath;
     }
 
@@ -49,7 +54,7 @@ public class DefaultNamingScheme implements NamingScheme {
         String osArch = System.getProperty("os.arch");
         String osName = System.getProperty("os.name").toLowerCase();
         Platform platform = new Platform(osArch, osName);
-        String result = libraryName + "-" + platform.osName + "-" + platform.architecture;
+        String result = libraryName + "-" + platform.osName + "-" + platform.architecture + "-" + version;
         if (relativePath != null) {
             return relativePath + result;
         } else {
@@ -94,7 +99,7 @@ public class DefaultNamingScheme implements NamingScheme {
     }
 
     public static void main(String[] args) {
-        DefaultNamingScheme scheme = new DefaultNamingScheme("thelib");
+        DefaultNamingScheme scheme = new DefaultNamingScheme("thelib", "0.4.2");
         System.out.println(scheme.determineName());
     }
 
